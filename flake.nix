@@ -16,15 +16,13 @@
         devShell =
           pkgs.mkShell {
             buildInputs = (import ./build-inputs.nix) { inherit pkgs; };
-          shellHook = ''
-            export CUDA_PATH=${pkgs.cudatoolkit}
-            export LD_LIBRARY_PATH=${pkgs.linuxPackages.nvidia_x11}/lib:${pkgs.ncurses5}/lib:/home/felix/code/futhark/haskell/src:${pkgs.ocl-icd}/lib
-            export EXTRA_LDFLAGS="-L/lib -L${pkgs.linuxPackages.nvidia_x11}/lib -L${pkgs.ocl-icd}/lib"
-            export EXTRA_CCFLAGS="-I/usr/include"
-            export OPENCL_LIB_PATH=${pkgs.ocl-icd}/lib
-
-            export OCL_ICD_VENDORS=/run/opengl-driver/etc/OpenCL/vendors
-          '';
+            shellHook = ''
+              export CUDA_PATH=${pkgs.cudatoolkit}
+              export LD_LIBRARY_PATH=${pkgs.linuxPackages.nvidia_x11}/lib:${pkgs.ncurses5}/lib:${pkgs.ocl-icd}/lib
+              export EXTRA_LDFLAGS="-L/lib -L${pkgs.linuxPackages.nvidia_x11}/lib -L${pkgs.ocl-icd}/lib"
+              export EXTRA_CCFLAGS="-I/usr/include"
+              export OCL_ICD_VENDORS=/run/opengl-driver/etc/OpenCL/vendors
+            '';
           };
         defaultPackage = import ./default.nix { inherit nixpkgs pkgs; };
         }
