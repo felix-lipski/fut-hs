@@ -15,9 +15,12 @@ libdotprod.so: dotprod.h
 	cp libdotprod.so lib
 	
 
-luser: luser.hs libdotprod.so
-	ghc luser.hs -L. -L$(OPENCL_LIB_PATH) -ldotprod -lOpenCL
-	# ghc luser.hs -L. -ldotprod -lOpenCL
+# luser: luser.hs libdotprod.so
+# 	ghc luser.hs -L. -L$(OPENCL_LIB_PATH) -ldotprod -lOpenCL
+# 	# ghc luser.hs -L. -ldotprod -lOpenCL
+	
+luser: luser.hs libdotprod.so dotprod.h
+	ghc luser.hs -L$(OPENCL_LIB_PATH) -lOpenCL dotprod.h dotprod.c
 
 clean:
-	rm *.o exe *.h dotprod.c dotprod dotprod.json libdotprod.so *.hi
+	rm *.o exe *.h dotprod.c dotprod dotprod.json libdotprod.so luser *.hi
