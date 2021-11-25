@@ -29,23 +29,52 @@ foreign import ccall "futhark_free_i32_1d"
 
 foreign import ccall "futhark_entry_dotprod"
   futhark_entry_dotprod :: Ptr Futhark_Context -> Ptr Int32
-                        -> Ptr Futhark_i32_1d -> Ptr Futhark_i32_1d -> IO ()
+                        -> Ptr Futhark_i32_1d -> Ptr Futhark_i32_1d 
+                        -> Ptr Int32 -> IO ()
+
+foreign import ccall "futhark_entry_times_two"
+  futhark_entry_times_two :: Ptr Futhark_Context -> Ptr Int32 -> Ptr Int32 -> IO ()
+
+foreign import ccall "entry_id_c"
+  entry_id_c :: Ptr Int32 -> Ptr Int32 -> IO ()
+
+foreign import ccall "entry_times_two_c"
+  entry_times_two_c :: Ptr Int32 -> Ptr Int32 -> IO ()
 
 main :: IO ()
 main = do
+    zPrt <- malloc :: IO (Ptr Int32)
+    poke zPrt (2::Int32)
+
     cfg <- futhark_context_config_new
     ctx <- futhark_context_new cfg
     
-    x <- newArray [1,2,3,4]
-    y <- newArray [2,3,4,1]
+    x <- newArray [1,2,3]
+    y <- newArray [1,5,7]
     
     x_arr <- futhark_new_i32_1d ctx x 4
     y_arr <- futhark_new_i32_1d ctx y 4
     
-    res <- alloca $ \res -> do futhark_entry_dotprod ctx res x_arr y_arr
-                               peek res
+    dotProdRes <- alloca $ \res -> futhark_entry_dotprod ctx res x_arr y_arr zPrt >> peek res
+
+
+    -- res2 <- alloca $ \p -> futhark_entry_times_two ctx p zPrt >> peek p
+
+    -- z1 <- peek zPrt
+
+    -- futhark_entry_times_two ctx zPrt zPrt
+
+    -- z2 <- peek zPrt
+
+    res <- alloca $ \res -> futhark_entry_times_two ctx res zPrt >> peek res
+    
+    -- res <- alloca $ \res -> entry_times_two_c res zPrt >> peek res
 
     sequence [ futhark_free_i32_1d ctx x_arr, futhark_free_i32_1d ctx y_arr ]
     futhark_free_full_context ctx cfg
 
-    putStrLn $ "Result: " ++ show res
+    -- putStrLn $ "z: " ++ show z1 
+    -- putStrLn $ "z: " ++ show z2
+    -- putStrLn $ "res2: " ++ show res2
+    -- putStrLn $ "res: " ++ show res
+    putStrLn $ "Dot prod: " ++ show dotProdRes
