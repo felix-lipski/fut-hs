@@ -1,6 +1,6 @@
 *.o
-*.h
 *.hi
 src/luser
 src/dotprod.c
 src/dotprod.json
+src/dotprod.h

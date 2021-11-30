@@ -31,21 +31,26 @@ foreign import ccall "futhark_entry_dotprod"
   futhark_entry_dotprod :: Ptr Futhark_Context -> Ptr Int32
                         -> Ptr Futhark_i32_1d -> Ptr Futhark_i32_1d -> IO ()
 
+foreign import ccall "futhark_entry_times_two"
+  futhark_entry_times_two :: Ptr Futhark_Context -> Ptr Int32 -> Int32 -> IO ()
+
 main :: IO ()
 main = do
     cfg <- futhark_context_config_new
     ctx <- futhark_context_new cfg
     
-    x <- newArray [1,2,3,4]
-    y <- newArray [2,3,4,1]
+    x <- newArray [1,2,3]
+    y <- newArray [1,5,7]
     
-    x_arr <- futhark_new_i32_1d ctx x 4
-    y_arr <- futhark_new_i32_1d ctx y 4
+    x_arr <- futhark_new_i32_1d ctx x 3
+    y_arr <- futhark_new_i32_1d ctx y 3
     
-    res <- alloca $ \res -> do futhark_entry_dotprod ctx res x_arr y_arr
-                               peek res
+    dotProdRes <- alloca $ \res -> futhark_entry_dotprod ctx res x_arr y_arr >> peek res
+
+    timesTwoRes <- alloca $ \res -> futhark_entry_times_two ctx res 2 >> peek res
 
     sequence [ futhark_free_i32_1d ctx x_arr, futhark_free_i32_1d ctx y_arr ]
     futhark_free_full_context ctx cfg
 
-    putStrLn $ "Result: " ++ show res
+    putStrLn $ "Times two: " ++ show timesTwoRes
+    putStrLn $ "Dot prod: " ++ show dotProdRes
